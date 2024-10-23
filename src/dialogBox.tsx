@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 interface DialogueBoxProps {
-  text: string; // The text now supports HTML content
+  text: string;
   onDisplayEnd: () => void;
   isVisible: boolean;
 }
@@ -12,10 +12,20 @@ const DialogueBox: React.FC<DialogueBoxProps> = ({
   isVisible,
 }) => {
   const [currentText, setCurrentText] = useState("");
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     if (isVisible) {
-      // Immediately show the full HTML content when dialogue becomes visible
       setCurrentText(text);
     }
   }, [isVisible, text]);
@@ -43,7 +53,8 @@ const DialogueBox: React.FC<DialogueBoxProps> = ({
       id="textbox-container"
       style={{
         position: "absolute",
-        bottom: "0px",
+        top: isMobile ? "50px" : "auto",
+        bottom: isMobile ? "auto" : "10px",
         left: "50%",
         transform: "translateX(-50%)",
         width: "80%",
@@ -89,11 +100,11 @@ const DialogueBox: React.FC<DialogueBoxProps> = ({
         <p
           id="dialogue"
           style={{ margin: 0 }}
-          dangerouslySetInnerHTML={{ __html: currentText }} // Render HTML content
+          dangerouslySetInnerHTML={{ __html: currentText }}
         ></p>
       </div>
 
-      {currentText && (
+      {!isMobile && currentText && (
         <p
           id="press-enter"
           style={{
