@@ -15,27 +15,29 @@ const GameScene: React.FC = () => {
       initKaboomWithCanvas(canvasRef.current);
     }
 
-    k.loadSprite("spritesheet", "./spritesheet.png", {
-      sliceX: 39,
-      sliceY: 31,
+    k.loadSprite("spritesheet", "./Itty_Bitty_6_Walk_sprites.png", {
+      sliceX: 15,
+      sliceY: 8,
       anims: {
-        "idle-down": 862,
-        "walk-down": { from: 862, to: 863, loop: true, speed: 4 },
-        "idle-side": 864,
-        "walk-side": { from: 864, to: 865, loop: true, speed: 4 },
-        "idle-up": 901,
-        "walk-up": { from: 901, to: 902, loop: true, speed: 4 },
+        "idle-down": 66,
+        "walk-down": { from: 66, to: 68, loop: true, speed: 6 },
+        "idle-side": 96,
+        "walk-side": { from: 96, to: 98, loop: true, speed: 6 },
+        "idle-up": 111,
+        "walk-up": { from: 111, to: 113, loop: true, speed: 6 },
       },
     });
 
-    k.loadSprite("map", "./map.png");
-    k.setBackground(k.Color.fromHex("#311047"));
+    k.loadSprite("map", "./mi-casa.png");
+    k.setBackground(k.Color.fromHex("#3a403b"));
 
     k.scene("main", async () => {
-      const mapData = await (await fetch("./map.json")).json();
+      const mapData = await (await fetch("./mi-casa.json")).json();
       const layers = mapData.layers;
 
       const map = k.add([k.sprite("map"), k.pos(0), k.scale(scaleFactor)]);
+
+      const playerScaleFactor = 6;
 
       const player = k.make([
         k.sprite("spritesheet", { anim: "idle-down" }),
@@ -45,7 +47,7 @@ const GameScene: React.FC = () => {
         k.body(),
         k.anchor("center"),
         k.pos(),
-        k.scale(scaleFactor),
+        k.scale(playerScaleFactor),
         {
           speed: 250,
           direction: "down",

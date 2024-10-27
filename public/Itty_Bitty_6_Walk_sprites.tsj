@@ -1,0 +1,14 @@
+{ "columns":15,
+ "image":"Itty Bitty RPG\/Itty_Bitty_6_Walk_sprites.png",
+ "imageheight":128,
+ "imagewidth":240,
+ "margin":0,
+ "name":"Itty_Bitty_6_Walk_sprites",
+ "spacing":0,
+ "tilecount":120,
+ "tiledversion":"1.11.0",
+ "tileheight":16,
+ "tilewidth":16,
+ "type":"tileset",
+ "version":"1.10"
+}
