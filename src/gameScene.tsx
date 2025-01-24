@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { dialogueData, scaleFactor, setCamScale } from "./constants";
 import { initKaboomWithCanvas, k } from "./kaboomCtx";
 import DialogueBox from "./dialogBox";
+import { rockPaperScissors } from "./rockPaperScissors";
 
 type DialogueKeys = keyof typeof dialogueData;
 
@@ -57,7 +58,9 @@ const GameScene: React.FC = () => {
       ]);
 
       const handleDialogue = (boundaryName: DialogueKeys) => {
-        if (boundaryName && dialogueData[boundaryName]) {
+        if (boundaryName === "fish") {
+          k.go("rockPaperScissors");
+        } else if (boundaryName && dialogueData[boundaryName]) {
           setDialogue(dialogueData[boundaryName]);
           setIsDialogueVisible(true);
         }
@@ -200,6 +203,7 @@ const GameScene: React.FC = () => {
       });
     });
 
+    rockPaperScissors();
     k.go("main");
 
     return () => {
