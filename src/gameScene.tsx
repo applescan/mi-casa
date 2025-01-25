@@ -11,6 +11,11 @@ const GameScene: React.FC = () => {
   const [isDialogueVisible, setIsDialogueVisible] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
+  let savedPlayerState: {
+    pos: { x: number; y: number };
+    direction: string;
+  } | null = null;
+
   useEffect(() => {
     if (canvasRef.current) {
       initKaboomWithCanvas(canvasRef.current);
@@ -32,176 +37,220 @@ const GameScene: React.FC = () => {
     k.loadSprite("map", "./mi-casa.png");
     k.setBackground(k.Color.fromHex("#3a403b"));
 
-    k.scene("main", async () => {
-      const mapData = await (await fetch("./mi-casa.json")).json();
-      const layers = mapData.layers;
+    k.scene(
+      "main",
+      async (context?: {
+        movePlayerBack?: boolean;
+        fromMiniGame?: boolean;
+      }) => {
+        const mapData = await (await fetch("./mi-casa.json")).json();
+        const layers = mapData.layers;
 
-      const map = k.add([k.sprite("map"), k.pos(0), k.scale(scaleFactor)]);
+        const map = k.add([k.sprite("map"), k.pos(0), k.scale(scaleFactor)]);
 
-      const playerScaleFactor = 6;
+        const playerScaleFactor = 6;
 
-      const player = k.make([
-        k.sprite("spritesheet", { anim: "idle-down" }),
-        k.area({
-          shape: new k.Rect(k.vec2(0, 3), 10, 10),
-        }),
-        k.body(),
-        k.anchor("center"),
-        k.pos(),
-        k.scale(playerScaleFactor),
-        {
-          speed: 250,
-          direction: "down",
-          isInDialogue: false,
-        },
-        "player",
-      ]);
+        const player = k.make([
+          k.sprite("spritesheet", { anim: "idle-down" }),
+          k.area({
+            shape: new k.Rect(k.vec2(0, 3), 10, 10),
+          }),
+          k.body(),
+          k.anchor("center"),
+          k.pos(),
+          k.scale(playerScaleFactor),
+          {
+            speed: 250,
+            direction: "down",
+            isInDialogue: false,
+          },
+          "player",
+        ]);
 
-      const handleDialogue = (boundaryName: DialogueKeys) => {
-        if (boundaryName === "fish") {
-          k.go("rockPaperScissors");
-        } else if (boundaryName && dialogueData[boundaryName]) {
-          setDialogue(dialogueData[boundaryName]);
-          setIsDialogueVisible(true);
-        }
-      };
+        const handleDialogue = (boundaryName: DialogueKeys) => {
+          if (boundaryName === "fish") {
+            savedPlayerState = {
+              pos: { x: player.pos.x, y: player.pos.y },
+              direction: player.direction,
+            };
 
-      for (const layer of layers) {
-        if (layer.name === "boundaries") {
-          for (const boundary of layer.objects) {
-            map.add([
-              k.area({
-                shape: new k.Rect(k.vec2(0), boundary.width, boundary.height),
-              }),
-              k.body({ isStatic: true }),
-              k.pos(boundary.x, boundary.y),
-              { name: boundary.name },
-            ]);
-
-            player.onCollide((obj) => {
-              const boundaryName = obj.name as DialogueKeys;
-
-              if (boundaryName && dialogueData[boundaryName]) {
-                if (!player.isInDialogue) {
-                  handleDialogue(boundaryName);
-                }
-              }
-            });
+            k.go("rockPaperScissors");
+          } else if (boundaryName && dialogueData[boundaryName]) {
+            setDialogue(dialogueData[boundaryName]);
+            setIsDialogueVisible(true);
           }
-        }
+        };
 
-        if (layer.name === "spawnpoints") {
-          for (const entity of layer.objects) {
-            if (entity.name === "player") {
-              player.pos = k.vec2(
-                (map.pos.x + entity.x) * scaleFactor,
-                (map.pos.y + entity.y) * scaleFactor
-              );
-              k.add(player);
+        for (const layer of layers) {
+          if (layer.name === "boundaries") {
+            for (const boundary of layer.objects) {
+              map.add([
+                k.area({
+                  shape: new k.Rect(k.vec2(0), boundary.width, boundary.height),
+                }),
+                k.body({ isStatic: true }),
+                k.pos(boundary.x, boundary.y),
+                { name: boundary.name },
+              ]);
+
+              player.onCollide((obj) => {
+                const boundaryName = obj.name as DialogueKeys;
+
+                if (boundaryName && dialogueData[boundaryName]) {
+                  if (!player.isInDialogue) {
+                    handleDialogue(boundaryName);
+                  }
+                }
+              });
+            }
+          }
+
+          if (layer.name === "spawnpoints") {
+            for (const entity of layer.objects) {
+              if (entity.name === "player") {
+                player.pos = k.vec2(
+                  (map.pos.x + entity.x) * scaleFactor,
+                  (map.pos.y + entity.y) * scaleFactor
+                );
+                k.add(player);
+              }
             }
           }
         }
-      }
 
-      setCamScale(k);
+        if (context?.fromMiniGame && savedPlayerState) {
+          player.pos = k.vec2(savedPlayerState.pos.x, savedPlayerState.pos.y);
+          player.direction = savedPlayerState.direction;
 
-      k.onResize(() => {
+          if (context?.movePlayerBack) {
+            player.pos = player.pos.add(k.vec2(20, 0));
+          }
+
+          if (player.direction === "down") {
+            player.play("idle-down");
+          } else if (player.direction === "up") {
+            player.play("idle-up");
+          } else {
+            player.play("idle-side");
+            player.flipX = player.direction === "left";
+          }
+        }
+
         setCamScale(k);
-      });
 
-      k.onUpdate(() => {
-        k.camPos(player.worldPos().x, player.worldPos().y - 100);
-      });
-
-      const stopAnims = () => {
-        if (player.direction === "down") {
-          player.play("idle-down");
-        } else if (player.direction === "up") {
-          player.play("idle-up");
-        } else {
-          player.play("idle-side");
-        }
-      };
-
-      k.onMouseRelease(stopAnims);
-      k.onKeyRelease(stopAnims);
-
-      k.onMouseDown((mouseBtn) => {
-        if (mouseBtn !== "left" || player.isInDialogue) return;
-
-        const worldMousePos = k.toWorld(k.mousePos());
-        player.moveTo(worldMousePos, player.speed);
-
-        const mouseAngle = player.pos.angle(worldMousePos);
-
-        const lowerBound = 50;
-        const upperBound = 125;
-
-        if (
-          mouseAngle > lowerBound &&
-          mouseAngle < upperBound &&
-          player.curAnim() !== "walk-up"
-        ) {
-          player.play("walk-up");
-          player.direction = "up";
-        } else if (
-          mouseAngle < -lowerBound &&
-          mouseAngle > -upperBound &&
-          player.curAnim() !== "walk-down"
-        ) {
-          player.play("walk-down");
-          player.direction = "down";
-        } else if (Math.abs(mouseAngle) > upperBound) {
-          player.flipX = false;
-          if (player.curAnim() !== "walk-side") player.play("walk-side");
-          player.direction = "right";
-        } else if (Math.abs(mouseAngle) < lowerBound) {
-          player.flipX = true;
-          if (player.curAnim() !== "walk-side") player.play("walk-side");
-          player.direction = "left";
-        }
-      });
-
-      k.onKeyDown(() => {
-        const keyMap = [
-          k.isKeyDown("right"),
-          k.isKeyDown("left"),
-          k.isKeyDown("up"),
-          k.isKeyDown("down"),
-        ];
-
-        let nbOfKeyPressed = 0;
-        keyMap.forEach((isKeyDown) => {
-          if (isKeyDown) nbOfKeyPressed++;
+        k.onResize(() => {
+          setCamScale(k);
         });
 
-        if (nbOfKeyPressed > 1 || player.isInDialogue) {
-          console.log("Movement blocked");
-          return;
-        }
+        k.onUpdate(() => {
+          // Prevent player movement and animations during dialogue
+          if (isDialogueVisible) {
+            player.stop();
+            return;
+          }
 
-        // Movement logic for keyboard inputs
-        if (keyMap[0]) {
-          player.flipX = false;
-          if (player.curAnim() !== "walk-side") player.play("walk-side");
-          player.direction = "right";
-          player.move(player.speed, 0);
-        } else if (keyMap[1]) {
-          player.flipX = true;
-          if (player.curAnim() !== "walk-side") player.play("walk-side");
-          player.direction = "left";
-          player.move(-player.speed, 0);
-        } else if (keyMap[2]) {
-          if (player.curAnim() !== "walk-up") player.play("walk-up");
-          player.direction = "up";
-          player.move(0, -player.speed);
-        } else if (keyMap[3]) {
-          if (player.curAnim() !== "walk-down") player.play("walk-down");
-          player.direction = "down";
-          player.move(0, player.speed);
-        }
-      });
-    });
+          // Camera follows the player
+          k.camPos(player.worldPos().x, player.worldPos().y - 100);
+        });
+
+        const stopAnims = () => {
+          if (isDialogueVisible) return;
+
+          if (player.direction === "down") {
+            player.play("idle-down");
+          } else if (player.direction === "up") {
+            player.play("idle-up");
+          } else if (player.direction === "left") {
+            player.play("idle-side");
+            player.flipX = true;
+          } else if (player.direction === "right") {
+            player.play("idle-side");
+            player.flipX = false;
+          }
+        };
+
+        k.onMouseRelease(stopAnims);
+        k.onKeyRelease(stopAnims);
+
+        k.onMouseDown((mouseBtn) => {
+          if (mouseBtn !== "left" || isDialogueVisible || player.isInDialogue)
+            return;
+
+          const worldMousePos = k.toWorld(k.mousePos());
+          player.moveTo(worldMousePos, player.speed);
+
+          const mouseAngle = player.pos.angle(worldMousePos);
+
+          const lowerBound = 50;
+          const upperBound = 125;
+
+          if (
+            mouseAngle > lowerBound &&
+            mouseAngle < upperBound &&
+            player.curAnim() !== "walk-up"
+          ) {
+            player.play("walk-up");
+            player.direction = "up";
+          } else if (
+            mouseAngle < -lowerBound &&
+            mouseAngle > -upperBound &&
+            player.curAnim() !== "walk-down"
+          ) {
+            player.play("walk-down");
+            player.direction = "down";
+          } else if (Math.abs(mouseAngle) > upperBound) {
+            player.flipX = false;
+            if (player.curAnim() !== "walk-side") player.play("walk-side");
+            player.direction = "right";
+          } else if (Math.abs(mouseAngle) < lowerBound) {
+            player.flipX = true;
+            if (player.curAnim() !== "walk-side") player.play("walk-side");
+            player.direction = "left";
+          }
+        });
+
+        k.onKeyDown(() => {
+          if (isDialogueVisible || player.isInDialogue) return;
+
+          const keyMap = [
+            k.isKeyDown("right"),
+            k.isKeyDown("left"),
+            k.isKeyDown("up"),
+            k.isKeyDown("down"),
+          ];
+
+          let nbOfKeyPressed = 0;
+          keyMap.forEach((isKeyDown) => {
+            if (isKeyDown) nbOfKeyPressed++;
+          });
+
+          if (nbOfKeyPressed > 1 || player.isInDialogue) {
+            return;
+          }
+
+          // Movement logic for keyboard inputs
+          if (keyMap[0]) {
+            player.flipX = false;
+            if (player.curAnim() !== "walk-side") player.play("walk-side");
+            player.direction = "right";
+            player.move(player.speed, 0);
+          } else if (keyMap[1]) {
+            player.flipX = true;
+            if (player.curAnim() !== "walk-side") player.play("walk-side");
+            player.direction = "left";
+            player.move(-player.speed, 0);
+          } else if (keyMap[2]) {
+            if (player.curAnim() !== "walk-up") player.play("walk-up");
+            player.direction = "up";
+            player.move(0, -player.speed);
+          } else if (keyMap[3]) {
+            if (player.curAnim() !== "walk-down") player.play("walk-down");
+            player.direction = "down";
+            player.move(0, player.speed);
+          }
+        });
+      }
+    );
 
     rockPaperScissors();
     k.go("main");

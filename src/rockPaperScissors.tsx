@@ -2,12 +2,20 @@ import { k } from "./kaboomCtx";
 
 export const rockPaperScissors = () => {
   k.scene("rockPaperScissors", () => {
-    const choices = ["rock", "paper", "scissors"] as const;
-    const choiceEmojis = { rock: "🪨", paper: "📄", scissors: "💇‍♂️" };
-    const fishEmoji = "🐟";
+    const choices = ["Rock", "Paper", "Scissors"] as const;
 
-    let playerChoice: "rock" | "paper" | "scissors" | null = null;
-    let computerChoice: "rock" | "paper" | "scissors" | null = null;
+    // Load assets
+    k.loadSprite("Rock", "/assets/rock.png");
+    k.loadSprite("Paper", "/assets/paper.png");
+    k.loadSprite("Scissors", "/assets/scissors.png");
+    k.loadSprite("fish", "/assets/fish.png");
+    k.loadSprite("background", "/assets/tank.jpg");
+
+    const SPRITE_SIZE = 64;
+
+    // Game state
+    let playerChoice: (typeof choices)[number] | null = null;
+    let computerChoice: (typeof choices)[number] | null = null;
 
     let playerScore = 0;
     let computerScore = 0;
@@ -15,29 +23,43 @@ export const rockPaperScissors = () => {
 
     const maxRounds = 3;
 
-    const resultText = k.add([
-      k.text("Choose your move!", { size: 24 }),
-      k.pos(k.width() / 2 - 120, 50),
+    // Background
+    k.add([
+      k.sprite("background", { width: k.width(), height: k.height() }),
+      k.pos(0, 0),
     ]);
 
+    // UI Elements
     const playerScoreText = k.add([
       k.text(`Player: ${playerScore}`, { size: 24 }),
-      k.pos(20, 10),
+      k.pos(k.width() / 4, 50),
+      k.anchor("center"),
+      k.color(0, 0, 0),
     ]);
 
     const computerScoreText = k.add([
       k.text(`Fish: ${computerScore}`, { size: 24 }),
-      k.pos(k.width() - 150, 10),
+      k.pos((3 * k.width()) / 4, 50),
+      k.anchor("center"),
+      k.color(0, 0, 0),
     ]);
 
-    const fishText = k.add([
-      k.text(fishEmoji, { size: 64 }),
-      k.pos(k.width() / 2 - 32, 100),
+    const resultText = k.add([
+      k.text("Choose your move!", { size: 24 }),
+      k.pos(k.width() / 2, 100),
+      k.anchor("center"),
+      k.color(0, 0, 0),
     ]);
 
-    const fishChoiceText = k.add([
-      k.text("", { size: 64 }),
-      k.pos(k.width() / 2 - 32, 200),
+    // Fish sprite
+    k.add([
+      k.sprite("fish", { width: SPRITE_SIZE * 5, height: SPRITE_SIZE * 5 }),
+      k.pos(k.width() / 2 - SPRITE_SIZE * 2.5, 80),
+    ]);
+
+    // Fish choice sprite
+    const fishChoiceSprite = k.add([
+      k.pos(k.width() / 2 - SPRITE_SIZE / 2, 290),
       { visible: false },
     ]);
 
@@ -47,66 +69,73 @@ export const rockPaperScissors = () => {
       roundsPlayed++;
 
       // Show the fish's choice
-      fishChoiceText.text = choiceEmojis[computerChoice];
-      fishChoiceText.visible = true;
+      fishChoiceSprite.use(
+        k.sprite(computerChoice, {
+          width: SPRITE_SIZE * 2,
+          height: SPRITE_SIZE * 2,
+        })
+      );
+      fishChoiceSprite.visible = true;
 
-      // Delay showing the result to give time to see the fish's choice
+      // Determine the round result
       setTimeout(() => {
         if (playerChoice === computerChoice) {
-          resultText.text = `It's a tie! Both chose ${choiceEmojis[playerChoice]}`;
+          resultText.text = `It's a tie! Both chose ${playerChoice}`;
         } else if (
-          (playerChoice === "rock" && computerChoice === "scissors") ||
-          (playerChoice === "paper" && computerChoice === "rock") ||
-          (playerChoice === "scissors" && computerChoice === "paper")
+          (playerChoice === "Rock" && computerChoice === "Scissors") ||
+          (playerChoice === "Paper" && computerChoice === "Rock") ||
+          (playerChoice === "Scissors" && computerChoice === "Paper")
         ) {
           playerScore++;
-          resultText.text = `You win this round! ${choiceEmojis[playerChoice]} beats ${choiceEmojis[computerChoice]}`;
+          resultText.text = `You win this round! ${playerChoice} beats ${computerChoice}`;
         } else {
           computerScore++;
-          resultText.text = `Fish wins this round! ${choiceEmojis[computerChoice]} beats ${choiceEmojis[playerChoice]}`;
+          resultText.text = `Rafayel wins this round! ${computerChoice} beats ${playerChoice}`;
         }
 
+        // Update scores
         playerScoreText.text = `Player: ${playerScore}`;
-        computerScoreText.text = `Fish: ${computerScore}`;
+        computerScoreText.text = `Rafayel the Fish: ${computerScore}`;
 
+        // Check if the game is over
         if (roundsPlayed >= maxRounds) {
           endGame();
         }
-      }, 1000); // 1-second delay
+      }, 1000);
     };
 
+    // End game
     const endGame = () => {
       if (playerScore > computerScore) {
-        resultText.text = `🎉 You win the game!
-        Final Score: ${playerScore}-${computerScore}`;
+        resultText.text = `You win the game! Final Score: ${playerScore}-${computerScore}`;
       } else if (computerScore > playerScore) {
-        resultText.text = `🐟 The fish wins the game!
-        Final Score: ${playerScore}-${computerScore}`;
+        resultText.text = `Rafayel the Fish wins the game! Final Score: ${playerScore}-${computerScore}`;
       } else {
-        resultText.text = `It's a tie game!
-        Final Score: ${playerScore}-${computerScore}`;
+        resultText.text = `It's a tie game! Final Score: ${playerScore}-${computerScore}`;
       }
 
       k.add([
         k.text("Press ESC to return to the main game.", { size: 16 }),
-        k.pos(k.width() / 2 - 150, k.height() - 50),
+        k.pos(k.width() / 2, k.height() - 90),
+        k.anchor("center"),
+        k.color(0, 0, 0),
       ]);
 
       k.onKeyPress("escape", () => {
-        k.go("main");
+        k.go("main", { fromMiniGame: true, movePlayerBack: true });
       });
-
       k.destroyAll("button");
     };
 
+    // Create buttons
     const createButton = (
-      label: "rock" | "paper" | "scissors",
+      label: (typeof choices)[number],
       x: number,
       onClick: () => void
     ) => {
       k.add([
-        k.text(choiceEmojis[label], { size: 64 }),
-        k.pos(x, k.height() / 2),
+        k.sprite(label, { width: SPRITE_SIZE * 2, height: SPRITE_SIZE * 2 }),
+        k.pos(x - SPRITE_SIZE, k.height() / 2 + 150),
         "button",
         k.area(),
         {
@@ -115,41 +144,34 @@ export const rockPaperScissors = () => {
       ]);
     };
 
+    // Add buttons for choices
     const centerX = k.width() / 2;
-    createButton("rock", centerX - 200, () => {
-      playerChoice = "rock";
+    createButton("Rock", centerX - 200, () => {
+      playerChoice = "Rock";
       computerChoice = choices[Math.floor(Math.random() * choices.length)];
       handleResult();
     });
 
-    createButton("paper", centerX, () => {
-      playerChoice = "paper";
+    createButton("Paper", centerX, () => {
+      playerChoice = "Paper";
       computerChoice = choices[Math.floor(Math.random() * choices.length)];
       handleResult();
     });
 
-    createButton("scissors", centerX + 200, () => {
-      playerChoice = "scissors";
+    createButton("Scissors", centerX + 200, () => {
+      playerChoice = "Scissors";
       computerChoice = choices[Math.floor(Math.random() * choices.length)];
       handleResult();
     });
 
+    // Handle button clicks
     k.onClick("button", (button) => {
       button.clickAction?.();
     });
 
+    // Escape to main menu
     k.onKeyPress("escape", () => {
-      k.go("main");
-    });
-
-    k.onDraw(() => {
-      if (roundsPlayed < maxRounds) {
-        k.drawText({
-          text: "Press ESC to return to the main game.",
-          size: 16,
-          pos: k.vec2(10, k.height() - 30),
-        });
-      }
+      k.go("main", { fromMiniGame: true, movePlayerBack: true });
     });
   });
 };
