@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { dialogueData, scaleFactor, setCamScale } from "./constants";
-import { initKaboomWithCanvas, k } from "./kaboomCtx";
 import DialogueBox from "./dialogBox";
 import { rockPaperScissors } from "./rockPaperScissors";
+import { GameObj } from "kaboom";
+import { initKaboomWithCanvas, k } from "./kaboomCtx";
 
 type DialogueKeys = keyof typeof dialogueData;
 
@@ -10,6 +11,7 @@ const GameScene: React.FC = () => {
   const [dialogue, setDialogue] = useState<string | null>(null);
   const [isDialogueVisible, setIsDialogueVisible] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const playerRef = useRef<GameObj | null>(null);
 
   let savedPlayerState: {
     pos: { x: number; y: number };
@@ -67,6 +69,8 @@ const GameScene: React.FC = () => {
           "player",
         ]);
 
+        playerRef.current = player;
+
         const handleDialogue = (boundaryName: DialogueKeys) => {
           if (boundaryName === "fish") {
             savedPlayerState = {
@@ -78,6 +82,7 @@ const GameScene: React.FC = () => {
           } else if (boundaryName && dialogueData[boundaryName]) {
             setDialogue(dialogueData[boundaryName]);
             setIsDialogueVisible(true);
+            player.isInDialogue = true;
           }
         };
 
@@ -173,8 +178,7 @@ const GameScene: React.FC = () => {
         k.onKeyRelease(stopAnims);
 
         k.onMouseDown((mouseBtn) => {
-          if (mouseBtn !== "left" || isDialogueVisible || player.isInDialogue)
-            return;
+          if (mouseBtn !== "left" || player.isInDialogue) return;
 
           const worldMousePos = k.toWorld(k.mousePos());
           player.moveTo(worldMousePos, player.speed);
@@ -210,7 +214,7 @@ const GameScene: React.FC = () => {
         });
 
         k.onKeyDown(() => {
-          if (isDialogueVisible || player.isInDialogue) return;
+          if (player.isInDialogue) return;
 
           const keyMap = [
             k.isKeyDown("right"),
@@ -263,6 +267,9 @@ const GameScene: React.FC = () => {
   const closeDialogue = () => {
     setIsDialogueVisible(false);
     setDialogue(null);
+    if (playerRef.current) {
+      playerRef.current.isInDialogue = false;
+    }
   };
 
   return (
