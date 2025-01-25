@@ -27,12 +27,12 @@ const GameScene: React.FC = () => {
       sliceX: 15,
       sliceY: 8,
       anims: {
-        "idle-down": 63,
-        "walk-down": { from: 63, to: 65, loop: true, speed: 6 },
-        "idle-side": 93,
-        "walk-side": { from: 93, to: 95, loop: true, speed: 6 },
-        "idle-up": 108,
-        "walk-up": { from: 108, to: 110, loop: true, speed: 6 },
+        "idle-down": 66,
+        "walk-down": { from: 66, to: 68, loop: true, speed: 6 },
+        "idle-side": 96,
+        "walk-side": { from: 96, to: 98, loop: true, speed: 6 },
+        "idle-up": 111,
+        "walk-up": { from: 111, to: 113, loop: true, speed: 6 },
       },
     });
 
