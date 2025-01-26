@@ -4,14 +4,18 @@ export const rockPaperScissors = () => {
   k.scene("rockPaperScissors", () => {
     const choices = ["Rock", "Paper", "Scissors"] as const;
 
-    // Load assets
-    k.loadSprite("Rock", "/assets/rock.png");
-    k.loadSprite("Paper", "/assets/paper.png");
-    k.loadSprite("Scissors", "/assets/scissors.png");
-    k.loadSprite("fish", "/assets/fish.png");
-    k.loadSprite("background", "/assets/tank.jpg");
+    // Global asset loading for faster access
+    k.loadRoot("/assets/");
+    k.loadSprite("Rock", "rock.webp");
+    k.loadSprite("Paper", "paper.webp");
+    k.loadSprite("Scissors", "scissors.webp");
+    k.loadSprite("fish", "fish.webp");
+    k.loadSprite("background", "tank.webp");
 
     const SPRITE_SIZE = 64;
+
+    // Responsive scaling for mobile
+    const scaleFactor = Math.min(window.innerWidth / 640, 1);
 
     // Game state
     let playerChoice: (typeof choices)[number] | null = null;
@@ -23,38 +27,42 @@ export const rockPaperScissors = () => {
 
     const maxRounds = 3;
 
-    // Background
-    k.add([
+    // Background with responsive scaling and centering
+    const background = k.add([
       k.sprite("background", { width: k.width(), height: k.height() }),
       k.pos(0, 0),
     ]);
+    background.use(k.scale(scaleFactor));
 
-    // UI Elements
+    // UI Elements (centered text)
     const playerScoreText = k.add([
-      k.text(`Player: ${playerScore}`, { size: 24 }),
-      k.pos(k.width() / 4, 50),
+      k.text(`Player: ${playerScore}`, { size: 24 * scaleFactor, width: 300 }),
+      k.pos(k.width() / 4, 50 * scaleFactor),
       k.anchor("center"),
       k.color(0, 0, 0),
     ]);
 
     const computerScoreText = k.add([
-      k.text(`Fish: ${computerScore}`, { size: 24 }),
-      k.pos((3 * k.width()) / 4, 50),
+      k.text(`Fish: ${computerScore}`, { size: 24 * scaleFactor, width: 300 }),
+      k.pos((3 * k.width()) / 4, 50 * scaleFactor),
       k.anchor("center"),
       k.color(0, 0, 0),
     ]);
 
     const resultText = k.add([
-      k.text("Choose your move!", { size: 24 }),
-      k.pos(k.width() / 2, 100),
+      k.text("Choose your move!", { size: 24 * scaleFactor, width: 300 }),
+      k.pos(k.width() / 2, 100 * scaleFactor),
       k.anchor("center"),
       k.color(0, 0, 0),
     ]);
 
     // Fish sprite
     k.add([
-      k.sprite("fish", { width: SPRITE_SIZE * 5, height: SPRITE_SIZE * 5 }),
-      k.pos(k.width() / 2 - SPRITE_SIZE * 2.5, 80),
+      k.sprite("fish", {
+        width: SPRITE_SIZE * 5 * scaleFactor,
+        height: SPRITE_SIZE * 5 * scaleFactor,
+      }),
+      k.pos(k.width() / 2 - SPRITE_SIZE * 2.5 * scaleFactor, 80),
     ]);
 
     // Fish choice sprite
@@ -71,8 +79,8 @@ export const rockPaperScissors = () => {
       // Show the fish's choice
       fishChoiceSprite.use(
         k.sprite(computerChoice, {
-          width: SPRITE_SIZE * 2,
-          height: SPRITE_SIZE * 2,
+          width: SPRITE_SIZE * 2 * scaleFactor,
+          height: SPRITE_SIZE * 2 * scaleFactor,
         })
       );
       fishChoiceSprite.visible = true;
@@ -87,10 +95,10 @@ export const rockPaperScissors = () => {
           (playerChoice === "Scissors" && computerChoice === "Paper")
         ) {
           playerScore++;
-          resultText.text = `You win this round! ${playerChoice} beats ${computerChoice}`;
+          resultText.text = `You win this round!\n${playerChoice} beats ${computerChoice}`;
         } else {
           computerScore++;
-          resultText.text = `Rafayel wins this round! ${computerChoice} beats ${playerChoice}`;
+          resultText.text = `Rafayel wins this round!\n${computerChoice} beats ${playerChoice}`;
         }
 
         // Update scores
@@ -104,19 +112,20 @@ export const rockPaperScissors = () => {
       }, 1000);
     };
 
-    // End game
     const endGame = () => {
       if (playerScore > computerScore) {
-        resultText.text = `You win the game! Final Score: ${playerScore}-${computerScore}`;
+        resultText.text = `You win the game!\nFinal Score: ${playerScore}-${computerScore}`;
       } else if (computerScore > playerScore) {
-        resultText.text = `Rafayel the Fish wins the game! Final Score: ${playerScore}-${computerScore}`;
+        resultText.text = `Rafayel the Fish wins the game!\nFinal Score: ${playerScore}-${computerScore}`;
       } else {
-        resultText.text = `It's a tie game! Final Score: ${playerScore}-${computerScore}`;
+        resultText.text = `It's a tie game!\nFinal Score: ${playerScore}-${computerScore}`;
       }
 
       k.add([
-        k.text("Press ESC to return to the main game.", { size: 16 }),
-        k.pos(k.width() / 2, k.height() - 90),
+        k.text("Press ESC to return to the main game.", {
+          size: 16 * scaleFactor,
+        }),
+        k.pos(k.width() / 2, k.height() - 90 * scaleFactor),
         k.anchor("center"),
         k.color(0, 0, 0),
       ]);
@@ -127,15 +136,21 @@ export const rockPaperScissors = () => {
       k.destroyAll("button");
     };
 
-    // Create buttons
+    // Button creation
     const createButton = (
       label: (typeof choices)[number],
       x: number,
       onClick: () => void
     ) => {
       k.add([
-        k.sprite(label, { width: SPRITE_SIZE * 2, height: SPRITE_SIZE * 2 }),
-        k.pos(x - SPRITE_SIZE, k.height() / 2 + 150),
+        k.sprite(label, {
+          width: SPRITE_SIZE * 2 * scaleFactor,
+          height: SPRITE_SIZE * 2 * scaleFactor,
+        }),
+        k.pos(
+          x - SPRITE_SIZE * scaleFactor,
+          k.height() / 2 + 150 * scaleFactor
+        ),
         "button",
         k.area(),
         {
@@ -146,7 +161,7 @@ export const rockPaperScissors = () => {
 
     // Add buttons for choices
     const centerX = k.width() / 2;
-    createButton("Rock", centerX - 200, () => {
+    createButton("Rock", centerX - 200 * scaleFactor, () => {
       playerChoice = "Rock";
       computerChoice = choices[Math.floor(Math.random() * choices.length)];
       handleResult();
@@ -158,7 +173,7 @@ export const rockPaperScissors = () => {
       handleResult();
     });
 
-    createButton("Scissors", centerX + 200, () => {
+    createButton("Scissors", centerX + 200 * scaleFactor, () => {
       playerChoice = "Scissors";
       computerChoice = choices[Math.floor(Math.random() * choices.length)];
       handleResult();
