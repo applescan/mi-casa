@@ -1,10 +1,7 @@
-import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import GameScene from "./gameScene";
 
-ReactDOM.render(
-  <React.StrictMode>
-    <GameScene />
-  </React.StrictMode>,
-  document.getElementById("app")
-);
+if (document.getElementById("root")) {
+  const root = createRoot(document.getElementById("root")!);
+  root.render(<GameScene />);
+}

@@ -1,25 +1,25 @@
 import { k } from "./kaboomCtx";
 
+export const preloadAssets = () => {
+  k.loadRoot("/assets/");
+  k.loadSprite("Rock", "rock.webp");
+  k.loadSprite("Paper", "paper.webp");
+  k.loadSprite("Scissors", "scissors.webp");
+  k.loadSprite("fish", "fish.webp");
+  k.loadSprite("background", "tank.webp");
+};
+
 export const rockPaperScissors = () => {
+  preloadAssets();
+
   k.scene("rockPaperScissors", () => {
     const choices = ["Rock", "Paper", "Scissors"] as const;
-
-    // Global asset loading for faster access
-    k.loadRoot("/assets/");
-    k.loadSprite("Rock", "rock.webp");
-    k.loadSprite("Paper", "paper.webp");
-    k.loadSprite("Scissors", "scissors.webp");
-    k.loadSprite("fish", "fish.webp");
-    k.loadSprite("background", "tank.webp");
 
     const SPRITE_SIZE = 64;
 
     // Responsive scaling
-    const scaleFactor = Math.min(
-      window.innerWidth / 640,
-      window.innerHeight / 480
-    );
-    const isPortrait = window.innerHeight > window.innerWidth;
+    const scaleFactor = Math.min(k.width() / 640, k.height() / 480);
+    const isPortrait = k.height() > k.width();
 
     // Game state
     let playerChoice: (typeof choices)[number] | null = null;
