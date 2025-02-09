@@ -1,5 +1,7 @@
 # Mi Casa 🏠
 
+![Game Screenshot](https://github.com/applescan/mi-casa/blob/main/public/assets/home.png)
+
 Welcome to **Mi Casa**! A fun, interactive virtual tour of my house where you can explore different rooms and get to know a little bit about me. Along the way, you'll encounter mini-games like rock-paper-scissors, with more exciting games coming soon! Whether you're here for the exploration or the gameplay, there's something for everyone in **Mi Casa**.
 
 ## Features
