@@ -1,50 +1,101 @@
-# React + TypeScript + Vite
+# Mi Casa 🏠
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Welcome to **Mi Casa**! A fun, interactive virtual tour of my house where you can explore different rooms and get to know a little bit about me. Along the way, you'll encounter mini-games like rock-paper-scissors, with more exciting games coming soon! Whether you're here for the exploration or the gameplay, there's something for everyone in **Mi Casa**.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Explore a virtual house**: Roam through different rooms and discover details about the house and its surroundings.
+- **Mini-games**: Enjoy exciting mini-games like rock-paper-scissors, with plans for more mini-games to be added in future updates.
+- **Interactive dialogue**: Trigger dialogues with various characters to learn more about the house and its world.
+- **Dynamic player movement**: Smooth and responsive movement system, allowing the player to move freely within the environment using both mouse and keyboard controls.
+- **Responsive camera**: The camera follows the player as they explore, offering a seamless and immersive experience.
 
-## Expanding the ESLint configuration
+## Technologies Used
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+**Mi Casa** is built with the following technologies:
 
-- Configure the top-level `parserOptions` property like this:
+- **Kaboom.js**: A simple and powerful 2D game framework for JavaScript/Typescript that enables us to create fast-paced, interactive gameplay. Kaboom.js is used for rendering the game world, managing player interactions, and controlling the game's logic and animations.
+  
+- **React**: React is used to handle the user interface (UI) for game elements like the dialogue box, which appears when interacting with characters. React ensures smooth, component-based updates and a dynamic experience throughout the game.
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+- **Canvas API**: The game’s environment and character animations are rendered using the HTML5 Canvas API, which gives us the flexibility to design and control everything down to the pixel level.
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+- **TypeScript**: TypeScript is used to ensure strong typing and better development experience with IDE support, error checking, and cleaner code for the game’s mechanics.
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+- **Custom Animations & Sprite Sheets**: The game’s characters and actions are animated using sprite sheets, allowing for smooth, frame-based animation for walking and idle states.
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+- **Game Logic**: Custom game logic is written using JavaScript to handle interactions, player movement, collision detection, and dialogue management.
+
+## Installation
+
+To run **Mi Casa** locally, follow these steps:
+
+1. **Clone the repository**:
+    ```bash
+    git clone https://github.com/applescan/mi-casa.git
+    ```
+
+2. **Navigate to the project directory**:
+    ```bash
+    cd mi-casa
+    ```
+
+3. **Install the dependencies**:
+    If you haven't installed dependencies yet, use npm to install them:
+    ```bash
+    npm install
+    ```
+
+4. **Run the development server**:
+    ```bash
+    npm start
+    ```
+
+5. **Play the game**:
+    Open your browser and go to `http://localhost:5173` to start playing the game!
+
+## How to Play
+
+- **Explore**: Click to move the player around the house and interact with various objects.
+- **Dialogue**: Trigger dialogue boxes by colliding with interactive boundaries or characters in the game.
+- **Mini-games**: Engage in mini-games like rock-paper-scissors.
+- **Movement**: Move the player using your mouse or the arrow keys for a smooth, dynamic exploration experience.
+
+## Roadmap
+
+Future updates for **Mi Casa** include:
+
+- **More mini-games**: Additional mini-games will be added to provide even more fun and challenges.
+- **New rooms and areas**: Explore new rooms in the house with different environments and interactions.
+- **Interactive features**: More interactive objects and dynamic gameplay features.
+
+## Contributing
+
+I welcome contributions! If you want to help improve the game, feel free to fork the repository and submit pull requests. Here are a few ways you can contribute:
+
+- **Bug Fixes**: Report bugs and help resolve them.
+- **Features**: Add new gameplay features and mini-games.
+- **Art Assets**: Contribute new character designs, environments, or animations.
+- **Localization**: Help translate the game into different languages.
+
+## Credits
+
+This game includes assets from the following sources:
+
+- **Interior Tilesets**:
+  - [Pixel Lands Interiors](https://trislin.itch.io/pixel-lands-interiors)
+  - [Top-Down Retro Interior](https://penzilla.itch.io/top-down-retro-interior)
+  - [Interior Tileset (16x16)](https://opengameart.org/content/interior-tileset-16x16)
+  
+- **Character Pack**:
+  - [Retro RPG Character Pack](https://the-pixel-nook.itch.io/retro-rpg-character-pack)
+
+Thank you to these creators for providing their assets to help bring **Mi Casa** to life!
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+---
+
+Enjoy exploring **Mi Casa**! Stay tuned for future updates and new content. Have fun and happy exploring!
