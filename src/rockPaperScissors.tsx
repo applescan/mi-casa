@@ -7,6 +7,7 @@ export const preloadAssets = () => {
   k.loadSprite("Scissors", "scissors.webp");
   k.loadSprite("fish", "fish.webp");
   k.loadSprite("background", "tank.webp");
+  k.loadSprite("quit", "quit.webp");
 };
 
 export const rockPaperScissors = () => {
@@ -28,7 +29,7 @@ export const rockPaperScissors = () => {
     let computerScore = 0;
     let roundsPlayed = 0;
     const maxRounds = 3;
-    let gameLocked = false; // Prevent multiple taps
+    let gameLocked = false;
 
     // Background (cropped for mobile)
     k.add([
@@ -39,7 +40,6 @@ export const rockPaperScissors = () => {
 
     // Text sizes
     const textSize = Math.max(18 * scaleFactor, 16);
-    const smallTextSize = Math.max(16 * scaleFactor, 12);
 
     // UI Elements (Centered)
     const playerScoreText = k.add([
@@ -132,20 +132,40 @@ export const rockPaperScissors = () => {
         resultText.text = `It's a tie game!\nFinal Score: ${playerScore}-${computerScore}`;
       }
 
-      k.add([
-        k.text("Press ESC to return to the main game.", {
-          size: smallTextSize,
-        }),
-        k.pos(k.width() / 2, k.height() - 70 * scaleFactor),
-        k.anchor("center"),
-        k.color(0, 0, 0),
-      ]);
-
       k.onKeyPress("escape", () => {
         k.go("main", { fromMiniGame: true, movePlayerBack: true });
       });
 
-      k.destroyAll("button");
+      k.get("button").forEach((button) => {
+        if (!button.hasLabel || button.label !== "quit") {
+          button.destroy();
+        }
+      });
+
+      createQuitButton(
+        k.width() / 2,
+        isPortrait
+          ? k.height() - 350 * scaleFactor
+          : k.height() - 70 * scaleFactor
+      );
+    };
+
+    const createQuitButton = (x: number, y: number) => {
+      k.add([
+        k.sprite("quit", {
+          width: 200 * scaleFactor,
+          height: 100 * scaleFactor,
+        }),
+        k.pos(x, y),
+        k.anchor("center"),
+        "button",
+        k.area(),
+        {
+          clickAction: () => {
+            k.go("main", { fromMiniGame: true, movePlayerBack: true });
+          },
+        },
+      ]);
     };
 
     // Button creation
